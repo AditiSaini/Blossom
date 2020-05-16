@@ -1,4 +1,4 @@
-# blossom
+# frontend
 
 A new Flutter application.
 
