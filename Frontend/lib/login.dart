@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'services/service.dart';
+import 'user.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -23,10 +25,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
+  Future<User> _loginUser;
+  final TextEditingController _controllerEmail = TextEditingController();
+  final TextEditingController _controllerPass = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final emailField = TextField(
+      controller: _controllerEmail,
       obscureText: false,
       style: style,
       decoration: InputDecoration(
@@ -37,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     final passwordField = TextField(
+      controller: _controllerPass,
       obscureText: true,
       style: style,
       decoration: InputDecoration(
@@ -53,7 +60,11 @@ class _MyHomePageState extends State<MyHomePage> {
         child: MaterialButton(
           minWidth: MediaQuery.of(context).size.width,
           padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-          onPressed: () {},
+          onPressed: () {
+            setState(() {
+              _loginUser = login(_controllerEmail.text, _controllerPass.text);
+            });
+          },
           child: Text("Login",
               textAlign: TextAlign.center,
               style: style.copyWith(
@@ -80,27 +91,39 @@ class _MyHomePageState extends State<MyHomePage> {
           color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(36.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(
-                  height: 155.0,
-                  child: Image(
-                    image: AssetImage("assets/logo.png"),
+            child: (_loginUser == null)
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 155.0,
+                        child: Image(
+                          image: AssetImage("assets/logo.png"),
+                        ),
+                      ),
+                      SizedBox(height: 45.0),
+                      emailField,
+                      SizedBox(height: 25.0),
+                      passwordField,
+                      SizedBox(height: 35.0),
+                      loginButton,
+                      SizedBox(height: 15.0),
+                      registerButton,
+                      SizedBox(height: 15.0),
+                    ],
+                  )
+                : FutureBuilder<User>(
+                    future: _loginUser,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Text(snapshot.data.email);
+                      } else if (snapshot.hasError) {
+                        return Text("${snapshot.error}");
+                      }
+                      return CircularProgressIndicator();
+                    },
                   ),
-                ),
-                SizedBox(height: 45.0),
-                emailField,
-                SizedBox(height: 25.0),
-                passwordField,
-                SizedBox(height: 35.0),
-                loginButton,
-                SizedBox(height: 15.0),
-                registerButton,
-                SizedBox(height: 15.0),
-              ],
-            ),
           ),
         ),
       ),
